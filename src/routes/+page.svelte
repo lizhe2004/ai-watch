@@ -29,11 +29,15 @@
 	$: {
 		if (searchResponse) {
 			let lastLength = recommendations.length;
+			console.log(searchResponse);
 			let x = searchResponse?.split('\n');
+			console.log("x.length:"+x.length);
 			recommendations = x.map((d, i) => {
+				console.log("iter：d:"+d+",i:"+i);
 				if ((x.length - 1 > i || endStream) && d !== '') {
 					// @ts-ignore
-					const [, title, description] = d.match(/\d\.\s*(.*?):\s*(.*)/);
+					const [, title, description] = d.match(/\d\.\s*(.*?)[:|：]\s*(.*)/);
+					console.log("title:"+title+",description:"+description);
 					return { title, description };
 				} else {
 					return d;
@@ -48,7 +52,7 @@
 	/**
 	 * @type {string}
 	 */
-	let cinemaType = 'tv show';
+	let cinemaType = '电影';
 	/**
 	 * @type {Array<string>}
 	 */
@@ -62,17 +66,17 @@
 		endStream = false;
 		loading = true;
 
-		let fullSearchCriteria = `Give me a list of 5 ${cinemaType} recommendations ${
-			selectedCategories ? `that fit all of the following categories: ${selectedCategories}` : ''
+		let fullSearchCriteria = ` 现在你是一名资深的影视剧评论家，你需要推荐5部符合下列条件的适合中国人观看的 ${cinemaType}请不要编造影视剧剧情以及演员信息，要实事求是。。根据豆瓣网、IMDb、Mtime时光网、猫眼电影、知乎网、百度百科等网站进行推荐，要求信息真实可靠，不要胡编乱造。\n ${
+			selectedCategories ? `它们的类型要属于：[ ${selectedCategories}]\n` : ''
 		}. ${
 			specificDescriptors
-				? `Make sure it fits the following description as well: ${specificDescriptors}.`
+				? `要与后面括号中的内容相关或符合其要求：( ${specificDescriptors}).\n`
 				: ''
 		} ${
 			selectedCategories || specificDescriptors
-				? `If you do not have 5 recommendations that fit these criteria perfectly, do your best to suggest other ${cinemaType}'s that I might like.`
+				? ``
 				: ''
-		} Please return this response as a numbered list with the ${cinemaType}'s title, followed by a colon, and then a brief description of the ${cinemaType}. There should be a line of whitespace between each item in the list.`;
+		} 请采用数字标记的列表清单的形式返回，格式为{序号. 标题:说明}，不要添加额外说明解释。每条记录之间用空行分隔。\n输出示例\n 1.{标题}:{说明}\n\n2.{标题}:{说明}\n\n3.{标题}:{说明}\n\n4.{标题}:{说明}\n\n5.{标题}:{说明}`;
 		const response = await fetch('/api/getRecommendation', {
 			method: 'POST',
 			body: JSON.stringify({ searched: fullSearchCriteria }),
@@ -94,7 +98,7 @@
 				while (true) {
 					const { value, done } = await reader.read();
 					const chunkValue = decoder.decode(value);
-
+					console.log("reading----"+chunkValue)
 					searchResponse += chunkValue;
 
 					if (done) {
@@ -104,6 +108,7 @@
 				}
 			} catch (err) {
 				error = 'Looks like OpenAI timed out :(';
+				console.log(err);
 			}
 		} else {
 			error = await response.text();
@@ -114,7 +119,7 @@
 		recommendations = [];
 		searchResponse = '';
 		endStream = false;
-		cinemaType = 'tv show';
+		cinemaType = '电影';
 		selectedCategories = [];
 		specificDescriptors = '';
 	}
@@ -162,7 +167,7 @@
 							on:click={clearForm}
 							class="bg-white/20 hover:bg-white/30 mt-4 w-full h-10 text-white font-bold p-3 rounded-full flex items-center justify-center"
 						>
-							Clear Search
+							清除搜索
 						</button>
 					{/if}
 				</div>

@@ -19,71 +19,73 @@
 	export let loading;
 
 	const categoryTypes = [
-		'Action',
-		'Adventure',
-		'Animation',
-		'Biography',
-		'Comedy',
-		'Crime',
-		'Documentary',
-		'Drama',
-		'Family',
-		'Fantasy',
-		'Film-Noir',
-		'History',
-		'Horror',
-		'Musical',
-		'Mystery',
-		'Romance',
-		'Sci-Fi',
-		'Sport',
-		'Thriller',
-		'War',
-		'Western',
-		'Art-house',
-		'Black-Comedy',
-		'Chick-flick',
-		'Cult-classic',
-		'Dark-Comedy',
-		'Epic',
-		'Erotic',
-		'Experimental',
-		'Fairy-tale',
-		'Film-within-a-film',
-		'Futuristic',
-		'Gangster',
-		'Heist',
-		'Historical',
-		'Holiday',
-		'Indie',
-		'Juvenile',
-		'Melodrama',
-		'Monster',
-		'Political',
-		'Psychological',
-		'Road-movie',
-		'Satire',
-		'Science-Fiction',
-		'Slapstick',
-		'Social-issue',
-		'Superhero',
-		'Surreal',
-		'Teen',
-		'Vampire',
-		'Zombie'
+	"动作片",
+"冒险片",
+"动画片",
+"传记片",
+"喜剧片",
+"犯罪片",
+"纪录片",
+"剧情片",
+"家庭片",
+"奇幻片",
+"黑色电影",
+"历史片",
+"恐怖片",
+"音乐剧",
+"悬疑片",
+"爱情片",
+"科幻片",
+"运动片",
+"惊悚片",
+"战争片",
+"西部片",
+"艺术类型",
+"黑色喜剧",
+"娇媚类型",
+"狂热经典",
+"黑色幽默",
+"史诗片",
+"情色类型",
+"实验类型",
+"童话片",
+"电影中的电影",
+"未来主义类型",
+"黑帮片",
+"抢劫片",
+"历史剧",
+"假日片",
+"独立类型",
+"青少年片",
+"悲剧",
+"怪物类型",
+"政治类型",
+"心理剧",
+"公路类型",
+"讽刺片",
+"科幻片",
+"闹剧",
+"社会议题",
+"超级英雄",
+"超现实",
+"青少年",
+"吸血鬼",
+"僵尸"
 	];
 
 	let cinemaTypes = [
-		{ value: 'tv show', title: 'TV Show' },
-		{ value: 'movie', title: 'Movie' },
-		{ value: 'tv show or movie', title: 'No Preference' }
+		{ value: '电视剧', title: '电视剧' },
+		{ value: '电影', title: '电影' },
+		{ value: '影视剧', title: '不限' }
 	];
 </script>
 
 <div class="pt-6 md:pt-10 text-slate-200">
 	<div>
 		<div class="mb-8">
-			<div class="mb-4 font-semibold text-lg">What kind of cinema are you searching for?</div>
+			<div class="mb-4 font-semibold text-lg">
+			您要查询的影视剧类型是？
+			</div>
 			<div class="flex items-center">
 				{#each cinemaTypes as type (type.value)}
 					<button
@@ -101,7 +103,7 @@
 		</div>
 		<div>
 			<div class="mb-4 font-semibold text-lg">
-				Select all categories that you want the show or movie to include.
+				选择想要观看的影视剧的分类
 			</div>
 			<div class="flex items-center flex-wrap">
 				{#each categoryTypes as category}
@@ -124,12 +126,12 @@
 		</div>
 		<div class="mt-8">
 			<div class="mb-4 font-semibold text-lg">
-				Write any other specifications here. Be as picky as you'd like.
+				在此处输入其他任意影视剧信息，可以随意发挥。
 			</div>
 			<textarea
 				bind:value={specificDescriptors}
 				class="bg-white/40 border border-white/0 p-2 rounded-md placeholder:text-slate-800 text-slate-900 w-full h-20 font-medium"
-				placeholder="Ex. Must have at least 2 seasons and be on Netflix or Hulu."
+				placeholder="例如：爱奇艺上映的有爸爸和儿子角色的电影"
 			/>
 			<button
 				on:click
@@ -142,7 +144,7 @@
 				{#if loading}
 					<LoadingIndicator />
 				{:else}
-					<p>Curate My List</p>
+					<p>生成我的片单</p>
 				{/if}
 			</button>
 		</div>

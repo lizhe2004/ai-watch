@@ -7,9 +7,9 @@
 	export let recommendation;
 
 	async function getRecommendationInfo() {
-		const response = await fetch('/api/getMediaDetails', {
-			method: 'POST',
-			body: JSON.stringify({ title: recommendation.title }),
+		const response = await fetch('/api/getMediaDetails?title='+recommendation.title, {
+			method: 'GET',
+		 
 			headers: {
 				'content-type': 'application/json'
 			}
@@ -24,7 +24,7 @@
 
 <div>
 	{#await promise}
-		<LoadingCard incomingStream={false} />
+		<LoadingCard incomingStream={recommendation.title+":"+recommendation.description} />
 	{:then data}
 		{#if data.Poster}
 			<div in:fade class="relative flex flex-col md:flex-row bg-neutral-800/70 shadow-md p-6">
@@ -48,10 +48,13 @@
 							</div>
 						</div>
 						<div class="text-slate-200/90 mb-4">
-							{data.Plot}
+							{recommendation.description}
+						</div>
+						<div class="text-slate-200/90 mb-4">
+							{@html data.Plot}
 						</div>
 						<div class="text-slate-200/50 mb-4">
-							Starring: {data.Actors}
+							明星: {data.Actors}
 						</div>
 					</div>
 					<div class="flex items-center">
