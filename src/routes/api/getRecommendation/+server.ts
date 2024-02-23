@@ -54,6 +54,7 @@ async function OpenAIStream(payload: OpenAIStreamPayload) {
 								return;
 							}
 							event.data=data;
+							console.log("要编码流式输出的文本"+text)
 							const queue = encoder.encode(text);
 							controller.enqueue(queue);
 							counter++;
