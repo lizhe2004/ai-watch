@@ -70,7 +70,7 @@ export async function GET({
 		"Accept-Encoding":"gzip, deflate, br",
 	});
 
-	let url = `https://m.douban.com/search/?query=${title}`;
+	let url = `https://m.douban.com/search/?query=${title}&type=1002`;
 	const res = await fetch(url, {
 			method: 'GET',
 			headers: headers
@@ -88,13 +88,19 @@ export async function GET({
 		const category = $(item).find(".search-results-modules-name").text();
 		if (category == "电影" || category == "电视剧") {
 			let rs = $($(item).find(".search_results_subjects")[0]).children();
-
-			let image = $(rs[0]).find('img')[0].attribs["src"]
+			var titleArray=[];
+			for(const itemFilm of $($(item).find(".search_results_subjects")[0]).find('.subject-title')){
+				$(itemFilm).text()
+				titleArray.push($(itemFilm).text())
+				console.log($(itemFilm).text())
+			}
+			 const matched = getMaxSimilarText(title,titleArray)
+			let image = $(rs[matched[0]]).find('img')[0].attribs["src"]
 
 			image= "/api/images?url="+image.slice(8)
 			console.log(image)
 			info.Poster = image;
-			let detail_url = $(rs[0]).find('a')[0].attribs["href"];
+			let detail_url = $(rs[matched[0]]).find('a')[0].attribs["href"];
 
 			let id = detail_url.slice(detail_url.lastIndexOf('subject/')+8,-1)
 			detail_url = `https://www.douban.com${detail_url}`;
@@ -195,6 +201,8 @@ export async function GET({
 			let actorsMeta=$pc("head > meta[property='video:actor']");
 			let directorsMeta=$pc("head > meta[property='video:director']");
 			//let writersMeta=$pc("head > meta[property='video:director']");
+
+			$pc("#content > div > div.aside > script:nth-child(2)")
 			let directors = [];
 			let actors = []
 			let writers = [""]
@@ -215,25 +223,122 @@ export async function GET({
 			info.Actors = actors.join(",");
 			info.Writer = writers.join(",");
 
-
-
-
-
-
-
-
-
- 
-
-
-
-
-
-
-
-
 		}
 	}
 	return json(info);
 
 }
+
+function getSimilarityForArray(text:string,textArray:string[]){
+	var simArray=[]
+	for(var i=0;i<textArray.length;i++){
+		const similarityValue =cosineSimilarity(text,textArray[i])
+		simArray.push({"index":i, "value":similarityValue})
+	}
+	
+	  return simArray;
+}
+
+function getMaxSimilarText(text:string,textArray:string[]){
+	if(textArray.length==0)
+		return [];
+	var simArray= getSimilarityForArray(text,textArray)
+	simArray.sort(function(a, b) {
+		return b.value - a.value;
+	  });
+	  return [simArray[0].index,textArray[simArray[0].index]]
+}
+
+// 余弦相似度
+function cosineSimilarity(text1:string, text2:string) {
+	// 将文本转换为字符数组
+	const chars1 = text1.split('');
+	const chars2 = text2.split('');
+  
+	// 创建一个包含所有字符的集合
+	const charSet = new Set([...chars1, ...chars2]);
+  
+	// 计算每个字符在两个文本中的出现次数
+	const charCount1 = countOccurrences(chars1);
+	const charCount2 = countOccurrences(chars2);
+  
+	// 计算余弦相似度
+	const dotProduct = calculateDotProduct(charCount1, charCount2);
+	const magnitude1 = calculateMagnitude(charCount1);
+	const magnitude2 = calculateMagnitude(charCount2);
+	const similarity = dotProduct / (magnitude1 * magnitude2);
+  
+	return similarity;
+  }
+  
+  // Jaccard相似度
+  function jaccardSimilarity(text1:string, text2:string) {
+	// 将文本转换为字符数组
+	const chars1 = text1.split('');
+	const chars2 = text2.split('');
+  
+	// 创建两个字符数组的集合
+	const set1 = new Set(chars1);
+	const set2 = new Set(chars2);
+  
+	// 计算交集和并集的大小
+	const intersectionSize = calculateIntersectionSize(set1, set2);
+	const unionSize = calculateUnionSize(set1, set2);
+  
+	// 计算Jaccard相似度
+	const similarity = intersectionSize / unionSize;
+  
+	return similarity;
+  }
+  
+  function countOccurrences(chars:string) {
+	const charCount = {};
+	for (const char of chars) {
+	  if (charCount[char]) {
+		charCount[char]++;
+	  } else {
+		charCount[char] = 1;
+	  }
+	}
+	return charCount;
+  }
+  
+  function calculateDotProduct(charCount1, charCount2) {
+	let dotProduct = 0;
+	for (const char in charCount1) {
+	  if (charCount2[char]) {
+		dotProduct += charCount1[char] * charCount2[char];
+	  }
+	}
+	return dotProduct;
+  }
+  
+  function calculateMagnitude(charCount) {
+	let magnitude = 0;
+	for (const char in charCount) {
+	  magnitude += Math.pow(charCount[char], 2);
+	}
+	return Math.sqrt(magnitude);
+  }
+  
+  function calculateIntersectionSize(set1, set2) {
+	let intersectionSize = 0;
+	for (const char of set1) {
+	  if (set2.has(char)) {
+		intersectionSize++;
+	  }
+	}
+	return intersectionSize;
+  }
+  
+  function calculateUnionSize(set1, set2) {
+	return set1.size + set2.size - calculateIntersectionSize(set1, set2);
+  }
+  
+  // 示例用法
+//   const text1 = "你好，世界！";
+//   const text2 = "你好，大家！";
+//   const cosineSimilarityValue = cosineSimilarity(text1, text2);
+//   const jaccardSimilarityValue = jaccardSimilarity(text1, text2);
+//   console.log(cosineSimilarityValue); // 输出：0.816496580927726
+//   console.log(jaccardSimilarityValue); // 输出：0.6666666666666666

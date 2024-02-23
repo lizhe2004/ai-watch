@@ -48,24 +48,18 @@ async function OpenAIStream(payload: OpenAIStreamPayload) {
 						const text = json.choices[0].delta.content;
 						
 						if(text){
-							console.log("原样输出 "+ text)
-							console.log(counter)
-							console.log(text.match(/\n/))
-							console.log(counter < 2 && (text.match(/\n/) || []).length)
+						
 							if (counter < 2 && (text.match(/\n/) || []).length) {
 								// this is a prefix character (i.e., "\n\n"), do nothing
-								console.log("counter < 2 && (text.match(/\n/) || []).length"+ text)
 								return;
 							}
 							event.data=data;
 							const queue = encoder.encode(text);
 							controller.enqueue(queue);
-							console.log("计数加一"+ text)
 							counter++;
 						}
 						else{
-							console.log("text为false？text是" + text)
-							console.log("text为false？data是 " + data)
+							
 						}
 					} catch (e) {
 						controller.error(e);
