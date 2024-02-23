@@ -36,7 +36,12 @@
 				console.log("iter：d:"+d+",i:"+i);
 				if ((x.length - 1 > i || endStream) && d !== '') {
 					// @ts-ignore
-					const [, title, description] = d.match(/\d\.\s*(.*?)[:|：]\s*(.*)/);
+					 if( d.match(/\d\.\s*(.*?)[:|：]\s*(.*)/)==null){
+						if (lastLength<2)
+							return d;
+						else return "";
+					 }
+					const [, title, description] = d.match(/\d\.\s*(.*?)[:|：]\s*(.*)/)
 					console.log("title:"+title+",description:"+description);
 					return { title, description };
 				} else {

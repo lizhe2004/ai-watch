@@ -29,7 +29,7 @@ export async function GET({
 	let info = {
 		"Title": "",
 		"Year": "未设置",
-		"Rated": "豆瓣",
+		"Rated": "未获取",
 		"Released": "未设置",
 		"Runtime": "未设置",
 		"Genre": "未设置",
@@ -54,7 +54,8 @@ export async function GET({
 		"BoxOffice": "无",
 		"Production": "无",
 		"Website": "无",
-		"Response": "True"
+		"Response": "True",
+		"PlayURL":"#"
 	};
 
 	let headers = new Headers({
@@ -96,7 +97,7 @@ export async function GET({
 			let detail_url = $(rs[0]).find('a')[0].attribs["href"];
 
 			let id = detail_url.slice(detail_url.lastIndexOf('subject/')+8,-1)
-			detail_url = `https://m.douban.com${detail_url}`;
+			detail_url = `https://www.douban.com${detail_url}`;
 
 			//    var cheerio = require('cheerio');
 			// detail_url = "https://m.douban.com/movie/subject/4811774/";
@@ -174,21 +175,39 @@ export async function GET({
 	 
 			info.Title=$pc("span[property='v:itemreviewed']")[0].children[0].data
 			info.Plot = $pc( $pc("span[property='v:summary']")[0]).html();
+			if( $pc('a[data-cn="爱奇艺视频"]')){
+				const url = $pc('a[data-cn="爱奇艺视频"]').attr('href');
+				if(url){
+					// 创建URL对象
+					const parsedUrl = new URL(url);
+
+					// 获取url参数的值
+					const urlParam = parsedUrl.searchParams.get('url');
+
+					// 解码url参数的值
+					info.PlayURL = decodeURIComponent(urlParam);
+			}
 			
+			}
 			info.Year= $pc('span[class=year]')[0].children[0].data;
-			info.Rated="豆瓣："+ $pc("strong[property='v:average']")[0].children[0].data
+			if($pc("strong[property='v:average']")[0].children[0])
+				info.Rated="豆瓣："+ $pc("strong[property='v:average']")[0].children[0].data
 			let actorsMeta=$pc("head > meta[property='video:actor']");
 			let directorsMeta=$pc("head > meta[property='video:director']");
 			//let writersMeta=$pc("head > meta[property='video:director']");
 			let directors = [];
 			let actors = []
 			let writers = [""]
-			for(var ai=0;  ai<actorsMeta.length && ai<5;ai++){
-				actors.push(actorsMeta[ai].attribs["content"])
+			
+			if(actorsMeta){
+				for(var ai=0;  ai<actorsMeta.length && ai<5;ai++){
+					actors.push(actorsMeta[ai].attribs["content"])
+				}
 			}
-	
-			for(var   di=0;di<directorsMeta.length && di<5;di++){
-				directors.push(directorsMeta[di].attribs["content"])
+			if(directorsMeta){
+				for(var   di=0;di<directorsMeta.length && di<5;di++){
+					directors.push(directorsMeta[di].attribs["content"])
+				}
 			}
 	
 

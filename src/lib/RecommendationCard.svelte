@@ -62,6 +62,18 @@
 							{data.Rated}
 						</div>
 					</div>
+					
+					<div class="flex items-center">
+						<div class="mr-4 py-1 px-2 rounded-full text-pink-600 border border-pink-600 text-xs">
+							<a  data-cn="爱奇艺视频" href="{data.PlayURL}" target="_blank">
+							{#if data.PlayURL != '#'}
+								爱奇艺视频
+							{:else}暂无播放源
+							{/if}
+						</a>
+					</div>
+				
+					</div>
 				</div>
 			</div>
 		{:else}
