@@ -102,6 +102,7 @@
 
 				while (true) {
 					const { value, done } = await reader.read();
+					console.log(done)
 					const chunkValue = decoder.decode(value);
 					console.log("reading----"+chunkValue)
 					searchResponse += chunkValue;
