@@ -98,7 +98,7 @@
 				}
 
 				const reader = data.getReader();
-				const decoder = new TextDecoder();
+				const decoder = new TextDecoder('utf-8');
 
 				while (true) {
 					const { value, done } = await reader.read();
