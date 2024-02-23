@@ -196,7 +196,7 @@ export async function GET({
 			
 			}
 			info.Year= $pc('span[class=year]')[0].children[0].data;
-			if($pc("strong[property='v:average']")[0].children[0])
+			if($pc("strong[property='v:average']").length>0 && $pc("strong[property='v:average']")[0].children[0])
 				info.Rated="豆瓣："+ $pc("strong[property='v:average']")[0].children[0].data
 			let actorsMeta=$pc("head > meta[property='video:actor']");
 			let directorsMeta=$pc("head > meta[property='video:director']");

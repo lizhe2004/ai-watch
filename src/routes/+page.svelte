@@ -8,6 +8,8 @@
 	import RecommendationCard from '$lib/RecommendationCard.svelte';
 	import { onMount } from 'svelte';
 	import LoadingCard from '$lib/LoadingCard.svelte';
+	import { createParser } from 'eventsource-parser';
+
 	let loading = false;
 	let error = '';
 	let endStream = false;
@@ -82,6 +84,8 @@
 				? ``
 				: ''
 		} 请采用数字标记的列表清单的形式返回，格式为{序号. 标题:说明}，不要添加额外说明解释。每条记录之间用空行分隔。\n输出示例\n 1.{标题}:{说明}\n\n2.{标题}:{说明}\n\n3.{标题}:{说明}\n\n4.{标题}:{说明}\n\n5.{标题}:{说明}`;
+		const encoder = new TextEncoder();
+		const decoder = new TextDecoder();
 		const response = await fetch('/api/getRecommendation', {
 			method: 'POST',
 			body: JSON.stringify({ searched: fullSearchCriteria }),
@@ -90,36 +94,70 @@
 			}
 		});
 
-		if (response.ok) {
-			try {
-				const data = response.body;
-				if (!data) {
+		// if (response.ok) {
+		// 	try {
+		// 		const data = response.body;
+		// 		if (!data) {
+		// 			return;
+		// 		}
+
+		// 		const reader = data.getReader();
+		// 		const decoder = new TextDecoder('utf-8');
+
+		// 		while (true) {
+		// 			const { value, done } = await reader.read();
+		// 			console.log
+		// 			const chunkValue = decoder.decode(value);
+		// 			console.log("reading----"+chunkValue)
+		// 			searchResponse += chunkValue;
+
+		// 			if (done) {
+		// 				endStream = true;
+		// 				break;
+		// 			}
+		// 		}
+		// 	} catch (err) {
+		// 		error = 'Looks like OpenAI timed out :(';
+		// 		console.log(err);
+		// 	}
+		// } else {
+		// 	error = await response.text();
+		// }
+		loading = false;
+		const reader = response.body.getReader();
+
+		function onParse(event) {
+			if (event.type === 'event') {
+				var data = event.data;
+				// https://beta.openai.com/docs/api-reference/completions/create#completions/create-stream
+				if (data === '[DONE]') {
 					return;
 				}
-
-				const reader = data.getReader();
-				const decoder = new TextDecoder('utf-8');
-
-				while (true) {
-					const { value, done } = await reader.read();
-					console.log(done)
-					const chunkValue = decoder.decode(value);
-					console.log("reading----"+chunkValue)
-					searchResponse += chunkValue;
-
-					if (done) {
-						endStream = true;
-						break;
-					}
-				}
-			} catch (err) {
-				error = 'Looks like OpenAI timed out :(';
-				console.log(err);
+				data = data.replace(/\\n/g, "\n");
+				console.log("reading" + data)
+				searchResponse += data;
 			}
-		} else {
-			error = await response.text();
 		}
-		loading = false;
+
+		// stream response (SSE) from OpenAI may be fragmented into multiple chunks
+		// this ensures we properly read chunks and invoke an event for each SSE event stream
+		const parser = createParser(onParse);
+		
+		// https://web.dev/streams/#asynchronous-iteration
+
+		
+		function readStream() {
+			return reader.read().then(({ done, value }) => {
+				if (done) {
+					return;
+				}
+				parser.feed(decoder.decode(value));
+				return readStream();
+			});
+		}
+		readStream().catch(error => {
+			console.error('Error reading stream:', error);
+		});
 	}
 	function clearForm() {
 		recommendations = [];

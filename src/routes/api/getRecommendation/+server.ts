@@ -1,8 +1,9 @@
 import { createParser } from 'eventsource-parser';
 import { OPENAI_API_KEY } from '$env/static/private';
+ 
 
 const key = OPENAI_API_KEY;
-
+ 
 interface OpenAIStreamPayload {
 	model: string;
 	messages: Array<object>;
@@ -33,11 +34,14 @@ async function OpenAIStream(payload: OpenAIStreamPayload) {
 
 	const stream = new ReadableStream({
 		async start(controller) {
-			function onParse(event: any) {
+			function onParse(event) {
 				if (event.type === 'event') {
 					const data = event.data;
 					// https://beta.openai.com/docs/api-reference/completions/create#completions/create-stream
 					if (data === '[DONE]') {
+
+						const queue = encoder.encode("data: " + data + "\n\n");
+						controller.enqueue(queue);
 						controller.close();
 						return;
 					}
@@ -45,7 +49,7 @@ async function OpenAIStream(payload: OpenAIStreamPayload) {
 						const json = JSON.parse(data);
 						console.log("接受到的内容是 "+data)
 						// const text = json.choices[0].text;
-						const text = json.choices[0].delta.content;
+						var text = json.choices[0].delta.content;
 						
 						if(text){
 						
@@ -53,9 +57,13 @@ async function OpenAIStream(payload: OpenAIStreamPayload) {
 								// this is a prefix character (i.e., "\n\n"), do nothing
 								return;
 							}
-							event.data=data;
+							event.data=text;
+
+			 
+							text = text.replace(/\n/g, "\\n");
+
 							console.log("要编码流式输出的文本"+text)
-							const queue = encoder.encode(text);
+							const queue = encoder.encode("data: " + text + "\n\n");
 							controller.enqueue(queue);
 							counter++;
 						}
@@ -79,7 +87,7 @@ async function OpenAIStream(payload: OpenAIStreamPayload) {
 			}
 		}
 	});
-	return stream;
+	return [stream,res.headers];
 }
 
 export async function POST({ request }: { request: any }) {
@@ -97,6 +105,6 @@ export async function POST({ request }: { request: any }) {
 		n: 1
 	};
 	console.log(payload);
-	const stream = await OpenAIStream(payload);
-	return new Response(stream);
+	const rs = await OpenAIStream(payload);
+	return new Response(rs[0],{ headers: rs[1] });
 }
