@@ -73,8 +73,8 @@
 		endStream = false;
 		loading = true;
 
-		let fullSearchCriteria = ` 现在你是一名资深的影视剧评论家，你需要推荐5部符合下列条件的适合中国人观看的 ${cinemaType}请不要编造影视剧剧情以及演员信息，要实事求是。。根据豆瓣网、IMDb、Mtime时光网、猫眼电影、知乎网、百度百科等网站进行推荐，要求信息真实可靠，不要胡编乱造。\n ${
-			selectedCategories ? `它们的类型要属于：[ ${selectedCategories}]\n` : ''
+		let fullSearchCriteria = ` 现在你是一名资深的影视剧评论家，你需要推荐5部符合下列条件的适合中国人观看的 ${cinemaType!="不限"?`${cinemaType}`:`影视剧`}, 请不要编造影视剧剧情以及演员信息，要实事求是。根据豆瓣网、IMDb、Mtime时光网、猫眼电影、知乎网、百度百科等网站进行推荐，要求信息真实可靠，不要胡编乱造。\n ${
+			selectedCategories.length>0 ? `它们的类型要属于：[ ${selectedCategories}]\n` : ''
 		}. ${
 			specificDescriptors
 				? `要与后面括号中的内容相关或符合其要求：( ${specificDescriptors}).\n`
@@ -83,7 +83,7 @@
 			selectedCategories || specificDescriptors
 				? ``
 				: ''
-		} 请采用数字标记的列表清单的形式返回，格式为{序号. 标题:说明}，不要添加额外说明解释。每条记录之间用空行分隔。\n输出示例\n 1.{标题}:{说明}\n\n2.{标题}:{说明}\n\n3.{标题}:{说明}\n\n4.{标题}:{说明}\n\n5.{标题}:{说明}`;
+		} 请采用数字标记的列表清单的形式返回，格式为{序号. 标题(发布年份):说明}，不要添加额外说明解释。每条记录之间用空行分隔。\n输出示例\n 1.摩登时代(1936):卓别林自导自演的一部经典默片，通过独特的幽默手法揭示了工业化社会中普通人的辛酸与无奈。\n\n2.城市之光(1931):卓别林执导并主演的喜剧电影，讲述了流浪汉与盲女之间的感人故事，体现了人性的善良与美好。\n\n3.大独裁者(1940):卓别林导演并主演的一部具有深刻反战与反法西斯主题的电影，他在片中饰演了一位与希特勒形象相仿的大独裁者。\n\n4.淘金记 The Gold Rush (1925):这是卓别林的代表作之一，影片以美国淘金热为背景，展现了小人物在逆境中的坚韧与乐观。\n\n5.马戏团(1928)[: 卓别林晚年自导自演的一部作品，通过讲述一个流浪艺人的人生起伏，展示了他对生活的热爱与追求。\n\n`;
 		const encoder = new TextEncoder();
 		const decoder = new TextDecoder();
 		const response = await fetch('/api/getRecommendation', {
@@ -131,7 +131,10 @@
 				var data = event.data;
 				// https://beta.openai.com/docs/api-reference/completions/create#completions/create-stream
 				if (data === '[DONE]') {
+					endStream = true
+					console.log("输出结束了！！！")
 					return;
+
 				}
 				data = data.replace(/\\n/g, "\n");
 				console.log("reading" + data)
