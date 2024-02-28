@@ -1,9 +1,10 @@
 import { createParser } from 'eventsource-parser';
-import { OPENAI_API_KEY } from '$env/static/private';
+import { OPENAI_API_KEY,OPENAI_API_BASE } from '$env/static/private';
  
 
 const key = OPENAI_API_KEY;
- 
+const base_url = OPENAI_API_BASE;
+console.log(key +  base_url) 
 interface OpenAIStreamPayload {
 	model: string;
 	messages: Array<object>;
@@ -23,7 +24,7 @@ async function OpenAIStream(payload: OpenAIStreamPayload) {
 	let counter = 0;
 
 	// const res = await fetch('https://api.openai.com/v1/completions', {
-		const res = await fetch("https://one-api.lizhe.io/v1/chat/completions", {
+		const res = await fetch(`${base_url}/v1/chat/completions`, {
 		headers: {
 			'Content-Type': 'application/json',
 			Authorization: `Bearer ${key}`
