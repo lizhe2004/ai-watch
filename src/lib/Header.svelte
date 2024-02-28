@@ -6,8 +6,8 @@
 	class="max-w-4xl mx-auto w-full flex md:flex-row flex-col items-center md:justify-between py-8 mb-12 border-b border-white/20"
 >
 	<button on:click class="flex items-center mb-4 md:mb-0 text-white/70">
-		<TvIcon />
-		<div class="text-2xl md:text-xl font-bold ml-2">watch.lizhe.io</div>
+		<img src="./logo.webp" width="50px"/>
+		<div class="text-2xl md:text-xl font-bold ml-2">私人影视小屋</div>
 	</button>
 	<a
 		class="bg-white/20 hover:bg-white/50 shadow text-white hover:text-pink-600 font-medium rounded p-2 text-sm flex items-center"
