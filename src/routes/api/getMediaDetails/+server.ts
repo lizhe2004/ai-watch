@@ -190,8 +190,37 @@ async function getDetailFromPC(pcUrl:string){
 			match_result = match
 			console.log("找到了！！！")
 			var sources = {};
-			const sourcesDeclaration = ' sources = ' + match[1] + ';' + match[2];
-			playlists = eval(sourcesDeclaration);
+			//  var sourcesDeclaration = ' sources = ' + match[1] + ';' + match[2];
+			// playlists = eval(sourcesDeclaration);
+			// console.log(sources)
+			// playlists = sources
+			var sources = {};
+			var sourcesDeclaration = match[1] + match[2];
+			console.log("所有的匹配结果"+sourcesDeclaration)
+			var sourcesMatch = sourcesDeclaration.match(/sources\[\d+\] = \[\s*[\s\S]*?\s*\];/g);
+			sourcesMatch.forEach(source => {
+				console.log("匹配结果"+source)
+				var sourceMatch = source.match(/sources\[(\d+)\] = \[\s*([\s\S]*?)\s*\];/);
+				var sourceKey = sourceMatch[1];
+				var sourceValue = sourceMatch[2].split('},').map(item => {
+					console.log(item)
+					item = item.trim();
+					if (!item.endsWith('}')) {
+						item += '}';
+					}
+					console.log(item)
+					var itemMatch = item.match(/\{play_link: "(.*?)", ep: "(.*?)"\}/);
+					if (itemMatch)
+						return { play_link: itemMatch[1], ep: itemMatch[2] };
+					else
+						return 
+				});
+				sources[sourceKey] = sourceValue;
+			});
+
+
+
+
 			//   console.log(sources);
 			playlists = sources
 
