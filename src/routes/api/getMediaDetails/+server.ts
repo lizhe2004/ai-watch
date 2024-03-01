@@ -20,12 +20,11 @@ export async function GET({
 	// 	title
 	// } = await request.json();
 	const rurl = new URL(request.url);
-	const title = rurl.searchParams.get("title");
-
+	var title = rurl.searchParams.get("title") ? rurl.searchParams.get("title") : "";
+	title = title.replace(/电视剧|电影/g, "");
 	// const info = await searchFromMobile(title?title :"")
 	const info = await searchFromPC(title?title :"")
 	return json({"code":200,"data":info});
-
 }
 
 async function searchFromPC(title:string){
@@ -306,6 +305,39 @@ async function getDetailFromPC(pcUrl:string){
 
 	return info
 }
+
+async function getVectorsFromAliCloud(textArray:string[],key:string){
+
+	let headers = new Headers({
+		"Content-Type": 'application/json',
+		'Authorization': `Bearer ${key}&`,
+	
+	});
+
+	let body ={
+		"model":"text-embedding-v2",
+		"input":{
+			"texts":textArray
+		},
+		"parameters": {
+    		"text_type": "document"
+    }
+	}
+	const vector_url = "https://dashscope.aliyuncs.com/api/v1/services/embeddings/text-embedding/text-embedding"
+	let tm2 = new Date().getTime();
+	const response = await fetch(vector_url, {
+		method: 'POST',
+		headers: headers,
+		body:body
+		
+	});
+	var data = response.json
+	return data.output.embeddings;
+}
+
+
+
+
 
 
 function getSimilarityForArray(text: string, textArray: string[]) {

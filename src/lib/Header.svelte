@@ -27,6 +27,6 @@
 				/></svg
 			></span
 		>
-		<span class="ml-2">占位</span>
+		<span class="ml-2"><a href="https://buy.lizhe.io/buy/1">付费交流</a></span>
 	</a>
 </div>
