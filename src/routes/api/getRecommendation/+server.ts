@@ -1,10 +1,15 @@
 import { createParser } from 'eventsource-parser';
-import { OPENAI_API_KEY,OPENAI_API_BASE } from '$env/static/private';
- 
+import { OPENAI_API_KEY,OPENAI_API_BASE, OPENAI_API_MODEL, OPENAI_API_TEMPERATURE,OPENAI_API_TOP_P } from '$env/static/private';
 
 const key = OPENAI_API_KEY;
 const base_url = OPENAI_API_BASE;
-console.log(key +  base_url) 
+const model = OPENAI_API_MODEL ? OPENAI_API_MODEL :"gpt-3.5-turbo";
+var v_temperature :number = OPENAI_API_TEMPERATURE ? parseFloat(OPENAI_API_TEMPERATURE): 0.7;
+const temperature =   v_temperature <= 2 && v_temperature > 0 ?  +(Math.round(v_temperature + "e+2")+"e-2") : 0.7;
+var  v_top_p = OPENAI_API_TOP_P ? parseFloat(OPENAI_API_TOP_P) : 0.9;
+const top_p =v_top_p <  1 && v_top_p > 0 ?  +(Math.round(v_top_p + "e+2")+"e-2") : 0.9;
+
+console.log("密钥是："+ key + "请求的url是" + base_url) 
 interface OpenAIStreamPayload {
 	model: string;
 	messages: Array<object>;
@@ -95,11 +100,11 @@ export async function POST({ request }: { request: any }) {
 	const { searched } = await request.json();
 	console.log(searched);
 	const payload = {
-		model: 'gpt-3.5-turbo',
+		model: model,
 		messages: [ {"role": "user", "content": searched}],
-		temperature: 0.7,
-		max_tokens: 2048,
-		top_p: 1.0,
+		temperature: temperature,
+		max_tokens: 1500,
+		top_p:top_p,
 		frequency_penalty: 0.0,
 		stream: true,
 		presence_penalty: 0.0,
